@@ -3,7 +3,7 @@ name: Труба
 on:
   workflow_run:
     workflows: [lint]
-    branches: [master,dry-run-test]
+    branches: [dry-run-test]
     types: [completed]
 
 jobs:
