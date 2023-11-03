@@ -82,7 +82,6 @@ jobs:
         timeout 5 docker run \
         -e TELEGRAM_TOKEN=${{ secrets.CI_TEST_TELEGRAM_TOKEN }} \
         -e IGOR_ID=${{ secrets.IGOR_ID }} \
-        -e KIRILL_ID=${{ secrets.KIRILL_ID }} \
         -e MAX_ID=${{ secrets.MAX_ID }} \
         -e GOOGLE_CREDENTIALS=${{ secrets.GOOGLE_CREDENTIALS }} \
         -e GOOGLE_SPREADSHEET_ID=${{ secrets.GOOGLE_SPREADSHEET_ID }} \
