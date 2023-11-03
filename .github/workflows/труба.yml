@@ -1,10 +1,12 @@
 name: Труба
 
-on:
-  workflow_run:
-    workflows: [lint]
-    branches: [dry-run-test]
-    types: [completed]
+# on:
+#   workflow_run:
+#     workflows: [lint]
+#     branches: [dry-run-test]
+#     types: [completed]
+
+on: [push]
 
 jobs:
 
