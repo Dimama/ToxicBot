@@ -3,7 +3,7 @@ name: Труба
 on:
   workflow_run:
     workflows: [lint]
-    branches: [master]
+    branches: [master,dry-run-test]
     types: [completed]
 
 jobs:
@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Intro
-      run: echo "Эту трубу я посвещаю своему другу девпопсеру, любителю клопов и змей"
+      run: echo "Эту трубу я посвящаю своему другу девпопсеру, любителю клопов и змей"
 
   binary:
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
@@ -50,7 +50,16 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v2
-
+      
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+      
+    - name: Login to Docker Hub
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+        
     - name: Download binary
       uses: actions/download-artifact@v2
       with:
@@ -58,38 +67,57 @@ jobs:
 
     - name: chmod
       run: chmod +x bot
-    
-    - name: Build and Push Docker
-      uses: mr-smithers-excellent/docker-build-push@v5.6
-      with:
-        image: 32133789756/toxicbot
-        registry: docker.io
-        tags: latest
-        username: ${{ secrets.DOCKER_USERNAME }}
-        password: ${{ secrets.DOCKER_PASSWORD }}
-
-  deploy:
-    runs-on: ubuntu-latest
-    needs: docker
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
       
-    - name: deploy to vscale server using ansible
-      uses: dawidd6/action-ansible-playbook@v2
+    - name: Build and export to Docker
+      uses: docker/build-push-action@v5
       with:
-        playbook: deploy.yaml
-        directory: deploy/
-        key: ${{secrets.SSH_PRIVATE_KEY}}
-        inventory: |
-          [vscale_host]
-          vscale ansible_host=37.228.116.131 ansible_user=root
-        options: |
-          --extra-vars "TELEGRAM_TOKEN=${{ secrets.TELEGRAM_TOKEN }} 
-          IGOR_ID=${{ secrets.IGOR_ID }}
-          MAX_ID=${{ secrets.MAX_ID }}
-          KIRILL_ID=${{ secrets.KIRILL_ID }}
-          STICKER_SETS=${{ secrets.STICKER_SETS != '' && secrets.STICKER_SETS || 'static_bulling_by_stickersthiefbot' }}
-          GOOGLE_CREDENTIALS=${{ secrets.GOOGLE_CREDENTIALS }}
-          GOOGLE_SPREADSHEET_ID=${{ secrets.GOOGLE_SPREADSHEET_ID }}"
+        context: .
+        load: true
+        tags: test-tag
+
+    - name: Test
+      run: |
+        docker run --rm test-tag
+        
+    # - name: Build and push
+    #   uses: docker/build-push-action@v5
+    #   with:
+    #     context: .
+    #     platforms: linux/amd64
+    #     push: true
+    #     tags: 32133789756/toxicbot
+        
+    # - name: Build and Push Docker
+    #   uses: mr-smithers-excellent/docker-build-push@v5.6
+    #   with:
+    #     image: 32133789756/toxicbot
+    #     registry: docker.io
+    #     tags: latest
+    #     username: ${{ secrets.DOCKER_USERNAME }}
+    #     password: ${{ secrets.DOCKER_PASSWORD }}
+
+  # deploy:
+  #   runs-on: ubuntu-latest
+  #   needs: docker
+  #   steps:
+  #   - name: Checkout repository
+  #     uses: actions/checkout@v2
+      
+  #   - name: deploy to vscale server using ansible
+  #     uses: dawidd6/action-ansible-playbook@v2
+  #     with:
+  #       playbook: deploy.yaml
+  #       directory: deploy/
+  #       key: ${{secrets.SSH_PRIVATE_KEY}}
+  #       inventory: |
+  #         [vscale_host]
+  #         vscale ansible_host=37.228.116.131 ansible_user=root
+  #       options: |
+  #         --extra-vars "TELEGRAM_TOKEN=${{ secrets.TELEGRAM_TOKEN }} 
+  #         IGOR_ID=${{ secrets.IGOR_ID }}
+  #         MAX_ID=${{ secrets.MAX_ID }}
+  #         KIRILL_ID=${{ secrets.KIRILL_ID }}
+  #         STICKER_SETS=${{ secrets.STICKER_SETS != '' && secrets.STICKER_SETS || 'static_bulling_by_stickersthiefbot' }}
+  #         GOOGLE_CREDENTIALS=${{ secrets.GOOGLE_CREDENTIALS }}
+  #         GOOGLE_SPREADSHEET_ID=${{ secrets.GOOGLE_SPREADSHEET_ID }}"
 
