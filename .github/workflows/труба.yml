@@ -82,18 +82,19 @@ jobs:
         timeout 5 docker run \
         -e TELEGRAM_TOKEN=${{ secrets.CI_TEST_TELEGRAM_TOKEN }} \
         -e IGOR_ID=${{ secrets.IGOR_ID }} \
+        -e KIRILL_ID=${{ secrets.KIRILL_ID }} \
         -e MAX_ID=${{ secrets.MAX_ID }} \
         -e GOOGLE_CREDENTIALS=${{ secrets.GOOGLE_CREDENTIALS }} \
         -e GOOGLE_SPREADSHEET_ID=${{ secrets.GOOGLE_SPREADSHEET_ID }} \
         --rm test-tag || [ $? -eq 124 ]
         
-    # - name: Build and push
-    #   uses: docker/build-push-action@v5
-    #   with:
-    #     context: .
-    #     platforms: linux/amd64
-    #     push: true
-    #     tags: 32133789756/toxicbot
+    - name: Build and push
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        platforms: linux/amd64
+        push: true
+        tags: 32133789756/toxicbot
         
     # - name: Build and Push Docker
     #   uses: mr-smithers-excellent/docker-build-push@v5.6
