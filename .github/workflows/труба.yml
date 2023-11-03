@@ -85,7 +85,7 @@ jobs:
         -e KIRILL_ID=${{ secrets.KIRILL_ID }} \
         -e MAX_ID=${{ secrets.MAX_ID }} \
         -e GOOGLE_CREDENTIALS=${{ secrets.GOOGLE_CREDENTIALS }} \
-        -e GOOGLE_SPREADSHEET_ID=${{ secrets.GOOGLE_SPREADSHEET_ID }}"
+        -e GOOGLE_SPREADSHEET_ID=${{ secrets.GOOGLE_SPREADSHEET_ID }} \
         --rm test-tag || [ $? -eq 124 ]
         
     # - name: Build and push
